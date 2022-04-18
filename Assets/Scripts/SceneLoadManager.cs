@@ -30,23 +30,24 @@ public class SceneLoadManager : MonoBehaviour
             //SceneManager.LoadScene("MainScene", new LoadSceneParameters(LoadSceneMode.Single, LocalPhysicsMode.Physics3D));
 
             //===== 비동기 방식 로딩 =====
-            StartCoroutine(nameof(OnCoroutine_LoadSceneAsync));
+            //StartCoroutine(nameof(OnCoroutine_LoadSceneAsync));
+            StartCoroutine(OnCoroutine_LoadSceneAsync("MainScene"));
 
         }
         //B 키를 눌렀을 때 TitleScene 으로 넘어가게 한다.
         else if (Input.GetKeyDown(KeyCode.B))
         {
-            //SceneManager.LoadScene(0);
             //SceneManager.LoadScene("TitleScene");
+            StartCoroutine(OnCoroutine_LoadSceneAsync("TitleScene"));
         }
     }
 
 
-    private IEnumerator OnCoroutine_LoadSceneAsync()
+    private IEnumerator OnCoroutine_LoadSceneAsync(string strSceneName)
     {
         yield return null;
 
-        AsyncOperation pAsyncOperation = SceneManager.LoadSceneAsync("MainScene");
+        AsyncOperation pAsyncOperation = SceneManager.LoadSceneAsync(strSceneName); //"MainScene"
 
         //작업의 완료 유무를 boolean 형으로 반환합니다.
         bool bIsDone  = pAsyncOperation.isDone;
@@ -67,16 +68,20 @@ public class SceneLoadManager : MonoBehaviour
         {
             yield return null;
 
-            if (progressbar.value < 1f)
+            if (null != progressbar)
             {
-                progressbar.value = Mathf.MoveTowards(progressbar.value, 1f, Time.deltaTime);
+                if (progressbar.value < 1f)
+                {
+                    progressbar.value = Mathf.MoveTowards(progressbar.value, 1f, Time.deltaTime);
+                }
+                else
+                {
+                    if(null != loadText)
+                        loadText.text = "Press SpaceBar";
+                }
             }
-            else
-            {
-                loadText.text = "Press SpaceBar";
-            }
-
-            if (Input.GetKeyDown(KeyCode.Space) && pAsyncOperation.progress >= 0.9f && progressbar.value >= 1f)
+            
+            if (Input.GetKeyDown(KeyCode.Space) && pAsyncOperation.progress >= 0.9f) //progressbar.value >= 1f
             {
                 pAsyncOperation.allowSceneActivation = true;
             }
